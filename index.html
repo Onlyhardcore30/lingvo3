@@ -411,10 +411,10 @@ async function doTranslate(){
   const translating=document.getElementById('translating');
   resultEl.style.display='none';translating.classList.add('show');
   try{
-    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcLang.code}|${dstLang.code}`;
+    const url=`https://lingva.ml/api/v1/${srcLang.code}/${dstLang.code}/${encodeURIComponent(text)}`;
     const resp=await fetch(url);
     const data=await resp.json();
-    const translated=data.responseData?.translatedText;
+    const translated=data.translation;
     if(!translated)throw new Error();
     translating.classList.remove('show');
     resultEl.style.display='';
