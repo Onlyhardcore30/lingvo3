@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
   html, body { height: 100%; font-family: 'Outfit', sans-serif; color: #f0f0ff; overflow: hidden; }
 
   body {
@@ -17,14 +16,11 @@
     animation: bgShift 15s ease infinite;
   }
   @keyframes bgShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
   }
 
   :root {
     --card: rgba(255,255,255,0.08);
-    --card-hover: rgba(255,255,255,0.13);
     --border: rgba(255,255,255,0.15);
     --text: #f0f0ff;
     --muted: rgba(240,240,255,0.45);
@@ -33,8 +29,7 @@
   }
 
   .app {
-    position: relative; z-index: 1; height: 100vh;
-    display: flex; flex-direction: column;
+    height: 100vh; display: flex; flex-direction: column;
     padding: 12px 14px 10px; gap: 10px;
   }
 
@@ -48,58 +43,53 @@
   .logo span { font-weight: 300; }
   .header-icons { display: flex; gap: 8px; }
   .header-icon-btn {
-    width: 38px; height: 38px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; backdrop-filter: blur(20px); transition: all 0.2s;
+    width: 36px; height: 36px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 11px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; font-size: 16px; backdrop-filter: blur(20px); transition: all 0.2s;
   }
   .header-icon-btn:active { transform: scale(0.9); }
   .header-icon-btn.active { border-color: var(--accent); background: rgba(124,159,255,0.15); }
 
-  /* Lang switcher */
+  /* Lang switcher — style like reference screenshot */
   .lang-switcher {
     display: flex; align-items: center; justify-content: center;
-    gap: 10px; flex-shrink: 0;
-  }
-  .flag-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 8px 16px; min-width: 72px;
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; cursor: pointer; backdrop-filter: blur(20px);
-    transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1); user-select: none;
+    border-radius: 18px; padding: 8px 12px; gap: 0;
+    backdrop-filter: blur(20px); flex-shrink: 0;
   }
-  .flag-btn:active {
-    transform: scale(0.93) translateY(2px);
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
-    background: rgba(255,255,255,0.04);
+
+  .lang-side {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1; cursor: pointer; padding: 6px 10px; border-radius: 12px;
+    transition: background 0.15s; user-select: none; justify-content: center;
   }
-  .flag-btn.selected {
-    border-color: rgba(124,159,255,0.6);
-    background: rgba(124,159,255,0.12);
-    box-shadow: 0 0 12px rgba(124,159,255,0.2);
+  .lang-side:active { background: rgba(255,255,255,0.08); }
+  .lang-side.selected { background: rgba(124,159,255,0.15); }
+
+  .flag-img {
+    width: 28px; height: 20px; border-radius: 4px;
+    object-fit: cover; flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
   }
-  .flag-emoji { font-size: 26px; line-height: 1; }
-  .flag-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; }
-  .flag-btn.selected .flag-label { color: var(--accent); }
+  .lang-name { font-size: 15px; font-weight: 700; color: var(--text); }
 
   .swap-btn {
-    background: rgba(124,159,255,0.15); border: 1px solid rgba(124,159,255,0.3);
-    border-radius: 12px; width: 40px; height: 40px;
-    cursor: pointer; font-size: 18px; color: var(--accent);
+    background: rgba(124,159,255,0.2); border: 1px solid rgba(124,159,255,0.35);
+    border-radius: 10px; width: 36px; height: 36px; cursor: pointer;
+    font-size: 16px; color: var(--accent);
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s; flex-shrink: 0;
+    transition: all 0.3s; flex-shrink: 0; margin: 0 4px;
   }
   .swap-btn:active { transform: rotate(180deg) scale(0.9); }
 
   /* Lang picker dropdown */
   .lang-picker {
-    position: fixed; z-index: 50; top: 130px;
+    position: fixed; z-index: 50; top: 115px;
     background: rgba(20,10,45,0.97); border: 1px solid var(--border);
     border-radius: 16px; padding: 8px;
     backdrop-filter: blur(30px);
     display: none; flex-direction: column; gap: 4px;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.5); min-width: 140px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5); min-width: 150px;
   }
   .lang-picker.show { display: flex; }
   .lang-picker.left { left: 14px; }
@@ -143,21 +133,19 @@
   .icon-btn.recording { color: #ff6b6b; border-color: #ff6b6b; animation: pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
 
-  .result-text { font-size: 17px; font-weight: 500; line-height: 1.5; min-height: 60px; }
+  .result-text { font-size: 17px; font-weight: 600; line-height: 1.5; min-height: 60px; }
   .result-text.placeholder { color: var(--muted); font-weight: 400; font-style: italic; }
   .result-actions {
     display: flex; justify-content: flex-end; gap: 8px;
     margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
   }
 
-  /* Translating dots */
   .translating { display: none; align-items: center; gap: 6px; margin-bottom: 6px; }
   .translating.show { display: flex; }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: dotP 1.2s infinite; }
   .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
   @keyframes dotP { 0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)} }
 
-  /* Screens */
   .screen { display: none; flex: 1; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; }
   .screen.active { display: flex; }
 
@@ -167,7 +155,7 @@
     border-radius: 16px; padding: 12px 14px; cursor: pointer;
     backdrop-filter: blur(10px); transition: background 0.2s;
   }
-  .list-item:active { background: var(--card-hover); }
+  .list-item:active { background: rgba(255,255,255,0.13); }
   .item-from { font-size: 13px; color: var(--muted); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .item-to { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .item-meta { display: flex; justify-content: space-between; margin-top: 6px; }
@@ -176,7 +164,6 @@
 
   .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
   .empty-icon { font-size: 44px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; }
 
   .settings-row {
     background: var(--card); border: 1px solid var(--border);
@@ -192,7 +179,6 @@
     backdrop-filter: blur(20px); opacity: 0; transition: all 0.25s; z-index: 100; white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
   .fade-in { animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
   ::-webkit-scrollbar { width: 3px; }
@@ -211,15 +197,16 @@
     </div>
   </div>
 
+  <!-- Lang switcher like reference -->
   <div class="lang-switcher">
-    <div class="flag-btn selected" id="srcBtn">
-      <div class="flag-emoji" id="srcFlag">🇷🇺</div>
-      <div class="flag-label" id="srcLabel">RU</div>
+    <div class="lang-side selected" id="srcBtn">
+      <img class="flag-img" id="srcFlagImg" src="" alt="">
+      <span class="lang-name" id="srcLabel">RU</span>
     </div>
     <button class="swap-btn" id="swapBtn">⇄</button>
-    <div class="flag-btn" id="dstBtn">
-      <div class="flag-emoji" id="dstFlag">🇬🇧</div>
-      <div class="flag-label" id="dstLabel">EN</div>
+    <div class="lang-side" id="dstBtn">
+      <img class="flag-img" id="dstFlagImg" src="" alt="">
+      <span class="lang-name" id="dstLabel">EN</span>
     </div>
   </div>
 
@@ -228,8 +215,8 @@
 
   <div class="screen active" id="screen-translate">
     <div class="card">
-      <div class="card-label">Оригинал</div>
-      <textarea id="inputText" placeholder="Введите текст..." maxlength="1000"></textarea>
+      <div class="card-label" id="srcCardLabel">Текст для перевода (RU)</div>
+      <textarea id="inputText" placeholder="Начните вводить текст..." maxlength="1000"></textarea>
       <div class="input-actions">
         <span class="char-count"><span id="charCount">0</span>/1000</span>
         <div class="action-btns">
@@ -240,7 +227,7 @@
     </div>
 
     <div class="card">
-      <div class="card-label">Перевод</div>
+      <div class="card-label" id="dstCardLabel">Перевод (EN)</div>
       <div class="translating" id="translating">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
       </div>
@@ -256,18 +243,15 @@
   <div class="screen" id="screen-history">
     <div class="list" id="historyList"></div>
   </div>
-
   <div class="screen" id="screen-favorites">
     <div class="list" id="favList"></div>
   </div>
-
   <div class="screen" id="screen-settings">
     <div class="card">
       <div class="card-label">О боте</div>
       <div style="font-size:14px;color:var(--muted);line-height:1.7">
         Lingvo3 — переводчик для Telegram<br>
-        Поддерживает: RU ↔ EN ↔ UK<br>
-        Автоперевод при вводе текста
+        RU ↔ EN ↔ UA · Автоперевод при вводе
       </div>
     </div>
     <div class="settings-row">
@@ -284,10 +268,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const tg = window.Telegram?.WebApp;
+const tg=window.Telegram?.WebApp;
 if(tg){tg.expand();}
 function haptic(t='light'){try{tg?.HapticFeedback?.impactOccurred(t);}catch(e){}}
-
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 
@@ -300,18 +283,22 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
+// Flag images via flagcdn.com
 const LANGS=[
-  {code:'ru',flag:'🇷🇺',label:'RU',speech:'ru-RU'},
-  {code:'en',flag:'🇬🇧',label:'EN',speech:'en-US'},
-  {code:'uk',flag:'🇺🇦',label:'UK',speech:'uk-UA'},
+  {code:'ru', label:'RU', flag:'https://flagcdn.com/w40/ru.png', speech:'ru-RU', name:'Русский'},
+  {code:'en', label:'EN', flag:'https://flagcdn.com/w40/us.png', speech:'en-US', name:'English'},
+  {code:'uk', label:'UA', flag:'https://flagcdn.com/w40/ua.png', speech:'uk-UA', name:'Українська'},
 ];
 let srcLang=LANGS[0], dstLang=LANGS[1];
 function getLang(c){return LANGS.find(l=>l.code===c);}
 
 function renderBtn(side){
   const l=side==='src'?srcLang:dstLang;
-  document.getElementById(side+'Flag').textContent=l.flag;
+  document.getElementById(side+'FlagImg').src=l.flag;
+  document.getElementById(side+'FlagImg').alt=l.label;
   document.getElementById(side+'Label').textContent=l.label;
+  document.getElementById('srcCardLabel').textContent=`Текст для перевода (${srcLang.label})`;
+  document.getElementById('dstCardLabel').textContent=`Перевод (${dstLang.label})`;
 }
 
 function buildPicker(id,side){
@@ -321,11 +308,12 @@ function buildPicker(id,side){
     const cur=side==='src'?srcLang:dstLang;
     const d=document.createElement('div');
     d.className='lang-option'+(lang.code===cur.code?' active':'');
-    d.innerHTML=`<span style="font-size:20px">${lang.flag}</span>${lang.label}`;
+    d.innerHTML=`<img src="${lang.flag}" style="width:24px;height:16px;border-radius:3px;object-fit:cover"> ${lang.name} <span style="color:var(--muted);font-size:12px">${lang.label}</span>`;
     d.onclick=()=>{
       haptic('medium');
       if(side==='src')srcLang=lang;else dstLang=lang;
-      renderBtn(side); p.classList.remove('show'); doTranslate();
+      renderBtn('src');renderBtn('dst');
+      p.classList.remove('show');doTranslate();
     };
     p.appendChild(d);
   });
@@ -373,7 +361,7 @@ document.querySelectorAll('.header-icon-btn').forEach(btn=>{
       document.querySelectorAll('.header-icon-btn').forEach(b=>b.classList.remove('active'));
       document.getElementById('screen-translate').classList.add('active');
       currentPanel=null;
-    } else {
+    }else{
       document.querySelectorAll('.header-icon-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('screen-'+panel).classList.add('active');
@@ -385,13 +373,11 @@ document.querySelectorAll('.header-icon-btn').forEach(btn=>{
 });
 
 const inputText=document.getElementById('inputText');
-let autoTimer=null, lastResult=null;
-
+let autoTimer=null,lastResult=null;
 function updateCharCount(){document.getElementById('charCount').textContent=inputText.value.length;}
 
 inputText.addEventListener('input',()=>{
-  updateCharCount();
-  clearTimeout(autoTimer);
+  updateCharCount();clearTimeout(autoTimer);
   if(!inputText.value.trim()){resetResult();return;}
   autoTimer=setTimeout(doTranslate,800);
 });
@@ -420,6 +406,7 @@ async function doTranslate(){
     resultEl.style.display='';
     resultEl.textContent=translated;
     resultEl.classList.remove('placeholder');
+    resultEl.classList.add('fade-in');
     lastResult={src:text,dst:translated,srcLang:srcLang.code,dstLang:dstLang.code,time:Date.now()};
     history.unshift(lastResult);
     if(history.length>50)history.pop();
@@ -436,14 +423,12 @@ async function doTranslate(){
 document.getElementById('clearBtn').addEventListener('click',()=>{
   haptic('light');inputText.value='';updateCharCount();resetResult();
 });
-
 document.getElementById('copyBtn').addEventListener('click',()=>{
   const r=document.getElementById('resultText');
   if(r.classList.contains('placeholder'))return;
   haptic('light');
   navigator.clipboard?.writeText(r.textContent).then(()=>toast('Скопировано ✓'));
 });
-
 document.getElementById('speakBtn').addEventListener('click',()=>{
   const r=document.getElementById('resultText');
   if(r.classList.contains('placeholder'))return;
@@ -451,7 +436,6 @@ document.getElementById('speakBtn').addEventListener('click',()=>{
   const utt=new SpeechSynthesisUtterance(r.textContent);
   utt.lang=dstLang.speech;speechSynthesis.speak(utt);
 });
-
 document.getElementById('favBtn').addEventListener('click',()=>{
   if(!lastResult)return;haptic('medium');
   const btn=document.getElementById('favBtn');
@@ -475,6 +459,7 @@ if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
 }else{micBtn.style.display='none';}
 
 const FLAGS={ru:'🇷🇺',en:'🇬🇧',uk:'🇺🇦'};
+const LABELS={ru:'RU',en:'EN',uk:'UA'};
 function timeAgo(ts){
   const d=Date.now()-ts;
   if(d<60000)return'только что';
@@ -485,7 +470,7 @@ function timeAgo(ts){
 
 function makeItem(h,onclick){
   const div=document.createElement('div');div.className='list-item fade-in';
-  div.innerHTML=`<div class="item-from">${h.src}</div><div class="item-to">${h.dst}</div><div class="item-meta"><span class="item-lang">${FLAGS[h.srcLang]} → ${FLAGS[h.dstLang]}</span><span class="item-time">${timeAgo(h.time)}</span></div>`;
+  div.innerHTML=`<div class="item-from">${h.src}</div><div class="item-to">${h.dst}</div><div class="item-meta"><span class="item-lang">${LABELS[h.srcLang]||h.srcLang} → ${LABELS[h.dstLang]||h.dstLang}</span><span class="item-time">${timeAgo(h.time)}</span></div>`;
   div.onclick=onclick;return div;
 }
 
@@ -505,13 +490,12 @@ function loadItem(item){
 
 function renderHistory(){
   const el=document.getElementById('historyList');el.innerHTML='';
-  if(!history.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🕒</div><div class="empty-text">История пуста</div></div>';return;}
+  if(!history.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">🕒</div><div>История пуста</div></div>';return;}
   history.forEach(h=>el.appendChild(makeItem(h,()=>loadItem(h))));
 }
-
 function renderFavorites(){
   const el=document.getElementById('favList');el.innerHTML='';
-  if(!favorites.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">Нет избранных</div></div>';return;}
+  if(!favorites.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">⭐</div><div>Нет избранных</div></div>';return;}
   favorites.forEach(h=>el.appendChild(makeItem(h,()=>loadItem(h))));
 }
 
