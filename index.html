@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Lingvo3</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d14;
+    --card: rgba(255,255,255,0.06);
+    --card-hover: rgba(255,255,255,0.09);
+    --border: rgba(255,255,255,0.1);
+    --text: #f0f0ff;
+    --muted: rgba(240,240,255,0.4);
+    --accent: #5b7fff;
+    --accent2: #a78bfa;
+    --danger: #ff6b6b;
+    --success: #4ade80;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* Animated background blobs */
+  .bg-blobs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .blob1 { width: 300px; height: 300px; background: #5b7fff; top: -80px; left: -60px; animation-delay: 0s; }
+  .blob2 { width: 250px; height: 250px; background: #a78bfa; bottom: 100px; right: -50px; animation-delay: -4s; }
+  .blob3 { width: 200px; height: 200px; background: #38bdf8; top: 40%; left: 30%; animation-delay: -8s; }
+
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(30px, 20px) scale(1.1); }
+  }
+
+  /* Main layout */
+  .app {
+    position: relative; z-index: 1;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 12px 14px 0;
+    gap: 10px;
+  }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    backdrop-filter: blur(20px);
+    flex-shrink: 0;
+  }
+  .logo {
+    font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo span { font-weight: 300; }
+
+  /* Lang switcher */
+  .lang-switcher {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px 14px;
+    backdrop-filter: blur(20px);
+    flex-shrink: 0;
+  }
+  .lang-btn {
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 6px 12px; border-radius: 10px;
+    transition: all 0.2s;
+    border: none; background: transparent; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .lang-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .swap-btn {
+    background: rgba(91,127,255,0.15);
+    border: 1px solid rgba(91,127,255,0.3);
+    border-radius: 10px; padding: 6px 10px;
+    cursor: pointer; font-size: 16px; color: var(--accent);
+    transition: all 0.3s; flex-shrink: 0;
+  }
+  .swap-btn:active { transform: rotate(180deg) scale(0.9); }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 6px; flex-shrink: 0;
+  }
+  .tab {
+    flex: 1; padding: 8px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    cursor: pointer; text-align: center;
+    transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tab .tab-icon { font-size: 16px; }
+  .tab.active { background: rgba(91,127,255,0.15); border-color: rgba(91,127,255,0.4); color: var(--accent); }
+
+  /* Screens */
+  .screen { display: none; flex: 1; flex-direction: column; gap: 10px; min-height: 0; }
+  .screen.active { display: flex; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 14px 16px;
+    backdrop-filter: blur(20px);
+    transition: border-color 0.2s;
+  }
+  .card:focus-within { border-color: rgba(91,127,255,0.5); }
+  .card-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px;
+  }
+
+  textarea {
+    width: 100%; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: 'Outfit', sans-serif;
+    font-size: 17px; font-weight: 400; resize: none;
+    line-height: 1.5; min-height: 80px;
+  }
+  textarea::placeholder { color: var(--muted); }
+
+  .input-actions {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
+  }
+  .char-count { font-size: 11px; color: var(--muted); }
+  .action-btns { display: flex; gap: 8px; }
+  .icon-btn {
+    background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer;
+    font-size: 14px; color: var(--muted); transition: all 0.2s;
+  }
+  .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
+  .icon-btn.recording { color: var(--danger); border-color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* Result card */
+  .result-text {
+    font-size: 17px; font-weight: 500; line-height: 1.5;
+    min-height: 60px; color: var(--text);
+  }
+  .result-text.placeholder { color: var(--muted); font-weight: 400; }
+  .result-actions {
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: 8px; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Skeleton loader */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px; height: 18px; margin-bottom: 8px;
+  }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  /* Translate button */
+  .translate-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 16px; padding: 15px;
+    color: #fff; font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 4px 20px rgba(91,127,255,0.35);
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .translate-btn:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(91,127,255,0.2); }
+  .translate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* History screen */
+  .history-list, .fav-list {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+  }
+  .history-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 12px 14px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .history-item:active { background: var(--card-hover); }
+  .history-from { font-size: 13px; color: var(--muted); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-to { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .history-lang { font-size: 10px; color: var(--accent); font-weight: 700; }
+  .history-time { font-size: 10px; color: var(--muted); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; }
+
+  .fav-btn { color: var(--muted); }
+  .fav-btn.active { color: #fbbf24; }
+
+  /* Settings */
+  .settings-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .settings-label { font-size: 14px; font-weight: 600; }
+  .settings-value { font-size: 13px; color: var(--muted); }
+
+  /* Bottom pad */
+  .bottom-pad { height: 10px; flex-shrink: 0; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(30,30,50,0.95); border: 1px solid var(--border);
+    padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600;
+    backdrop-filter: blur(20px); opacity: 0; transition: all 0.3s; z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Lingvo<span>3</span></div>
+    <div style="font-size:12px;color:var(--muted)" id="statsLabel">0 переводов</div>
+  </div>
+
+  <!-- Lang Switcher -->
+  <div class="lang-switcher">
+    <select id="srcLang" style="background:transparent;border:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;cursor:pointer;">
+      <option value="ru">🇷🇺 RU</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="uk">🇺🇦 UK</option>
+    </select>
+    <button class="swap-btn" id="swapBtn">⇄</button>
+    <select id="dstLang" style="background:transparent;border:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;cursor:pointer;">
+      <option value="en">🇬🇧 EN</option>
+      <option value="ru">🇷🇺 RU</option>
+      <option value="uk">🇺🇦 UK</option>
+    </select>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="translate"><div class="tab-icon">🌐</div>Перевод</div>
+    <div class="tab" data-tab="history"><div class="tab-icon">🕒</div>История</div>
+    <div class="tab" data-tab="favorites"><div class="tab-icon">⭐</div>Избранное</div>
+    <div class="tab" data-tab="settings"><div class="tab-icon">⚙️</div>Настройки</div>
+  </div>
+
+  <!-- TRANSLATE SCREEN -->
+  <div class="screen active" id="screen-translate">
+    <div class="card">
+      <div class="card-label">Оригинал</div>
+      <textarea id="inputText" placeholder="Введите текст для перевода..." rows="4" maxlength="1000"></textarea>
+      <div class="input-actions">
+        <span class="char-count"><span id="charCount">0</span>/1000</span>
+        <div class="action-btns">
+          <button class="icon-btn" id="micBtn" title="Голосовой ввод">🎤</button>
+          <button class="icon-btn" id="clearBtn" title="Очистить">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard">
+      <div class="card-label">Перевод</div>
+      <div class="result-text placeholder" id="resultText">Перевод появится здесь...</div>
+      <div class="result-actions">
+        <button class="icon-btn fav-btn" id="favBtn" title="В избранное">⭐</button>
+        <button class="icon-btn" id="speakBtn" title="Прослушать">🔊</button>
+        <button class="icon-btn" id="copyBtn" title="Копировать">📋</button>
+      </div>
+    </div>
+
+    <button class="translate-btn" id="translateBtn">ПЕРЕВЕСТИ</button>
+    <div class="bottom-pad"></div>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div class="screen" id="screen-history">
+    <div class="history-list" id="historyList"></div>
+    <div class="bottom-pad"></div>
+  </div>
+
+  <!-- FAVORITES SCREEN -->
+  <div class="screen" id="screen-favorites">
+    <div class="fav-list" id="favList"></div>
+    <div class="bottom-pad"></div>
+  </div>
+
+  <!-- SETTINGS SCREEN -->
+  <div class="screen" id="screen-settings">
+    <div class="card">
+      <div class="card-label">О боте</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6">
+        Lingvo3 — переводчик для Telegram.<br>
+        Поддерживает: RU ↔ EN ↔ UK<br>
+        Powered by Google Translate API
+      </div>
+    </div>
+    <div class="settings-item">
+      <span class="settings-label">Очистить историю</span>
+      <button class="icon-btn" id="clearHistoryBtn">🗑</button>
+    </div>
+    <div class="settings-item">
+      <span class="settings-label">Очистить избранное</span>
+      <button class="icon-btn" id="clearFavBtn">🗑</button>
+    </div>
+    <div class="bottom-pad"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Telegram WebApp init ──────────────────────────────────────────────────
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.expand(); tg.setHeaderColor('#0d0d14'); }
+
+function haptic(type = 'light') {
+  try { tg?.HapticFeedback?.impactOccurred(type); } catch(e) {}
+}
+
+// ── Storage ──────────────────────────────────────────────────────────────
+function loadData(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; }
+}
+function saveData(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+let history = loadData('lingvo_history', []);
+let favorites = loadData('lingvo_favorites', []);
+
+function updateStats() {
+  document.getElementById('statsLabel').textContent = `${history.length} переводов`;
+}
+updateStats();
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    haptic('light');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    const screen = document.getElementById('screen-' + tab.dataset.tab);
+    screen.classList.add('active');
+    if (tab.dataset.tab === 'history') renderHistory();
+    if (tab.dataset.tab === 'favorites') renderFavorites();
+  });
+});
+
+// ── Lang switcher ─────────────────────────────────────────────────────────
+const srcLang = document.getElementById('srcLang');
+const dstLang = document.getElementById('dstLang');
+
+const LANG_OPTIONS = [
+  { value: 'ru', label: '🇷🇺 RU' },
+  { value: 'en', label: '🇬🇧 EN' },
+  { value: 'uk', label: '🇺🇦 UK' },
+];
+
+function populateSelect(sel, exclude) {
+  const cur = sel.value;
+  sel.innerHTML = '';
+  LANG_OPTIONS.filter(l => l.value !== exclude).forEach(l => {
+    const o = document.createElement('option');
+    o.value = l.value; o.textContent = l.label;
+    sel.appendChild(o);
+  });
+  if ([...sel.options].find(o => o.value === cur)) sel.value = cur;
+}
+
+srcLang.addEventListener('change', () => { populateSelect(dstLang, srcLang.value); });
+dstLang.addEventListener('change', () => { populateSelect(srcLang, dstLang.value); });
+
+document.getElementById('swapBtn').addEventListener('click', () => {
+  haptic('medium');
+  const tmp = srcLang.value;
+  const srcVal = dstLang.value;
+  const dstVal = tmp;
+  populateSelect(srcLang, srcVal); srcLang.value = srcVal;
+  populateSelect(dstLang, dstVal); dstLang.value = dstVal;
+  // also swap input/result text
+  const inputText = document.getElementById('inputText');
+  const resultEl = document.getElementById('resultText');
+  if (!resultEl.classList.contains('placeholder')) {
+    const tmp2 = inputText.value;
+    inputText.value = resultEl.textContent;
+    resultEl.textContent = tmp2;
+    updateCharCount();
+  }
+});
+
+// init
+populateSelect(srcLang, 'en'); srcLang.value = 'ru';
+populateSelect(dstLang, 'ru'); dstLang.value = 'en';
+
+// ── Char count ────────────────────────────────────────────────────────────
+const inputText = document.getElementById('inputText');
+function updateCharCount() {
+  document.getElementById('charCount').textContent = inputText.value.length;
+}
+inputText.addEventListener('input', updateCharCount);
+
+// ── Clear ─────────────────────────────────────────────────────────────────
+document.getElementById('clearBtn').addEventListener('click', () => {
+  haptic('light');
+  inputText.value = ''; updateCharCount();
+  resetResult();
+});
+
+function resetResult() {
+  const r = document.getElementById('resultText');
+  r.textContent = 'Перевод появится здесь...';
+  r.classList.add('placeholder');
+  document.getElementById('favBtn').classList.remove('active');
+}
+
+// ── Translate ─────────────────────────────────────────────────────────────
+let lastResult = null;
+
+document.getElementById('translateBtn').addEventListener('click', doTranslate);
+
+async function doTranslate() {
+  const text = inputText.value.trim();
+  if (!text) { showToast('Введите текст'); return; }
+  haptic('medium');
+
+  const btn = document.getElementById('translateBtn');
+  btn.disabled = true; btn.textContent = 'Переводим...';
+
+  const resultEl = document.getElementById('resultText');
+  resultEl.classList.remove('placeholder');
+  resultEl.innerHTML = '<div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:60%"></div>';
+
+  const src = srcLang.value;
+  const dst = dstLang.value;
+
+  try {
+    // Using MyMemory free translation API (no key needed)
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${src}|${dst}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const translated = data.responseData?.translatedText;
+
+    if (!translated) throw new Error('No translation');
+
+    resultEl.textContent = translated;
+    resultEl.classList.add('fade-in');
+    lastResult = { src: text, dst: translated, srcLang: src, dstLang: dst, time: Date.now() };
+
+    // Save to history
+    history.unshift(lastResult);
+    if (history.length > 50) history.pop();
+    saveData('lingvo_history', history);
+    updateStats();
+
+    document.getElementById('favBtn').classList.remove('active');
+
+  } catch(e) {
+    resultEl.textContent = '⚠️ Ошибка перевода. Проверьте интернет.';
+    resultEl.classList.add('placeholder');
+  }
+
+  btn.disabled = false; btn.textContent = 'ПЕРЕВЕСТИ';
+}
+
+// ── Copy ──────────────────────────────────────────────────────────────────
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const r = document.getElementById('resultText');
+  if (r.classList.contains('placeholder')) return;
+  haptic('light');
+  navigator.clipboard?.writeText(r.textContent).then(() => showToast('Скопировано ✓'));
+});
+
+// ── Speak ─────────────────────────────────────────────────────────────────
+document.getElementById('speakBtn').addEventListener('click', () => {
+  const r = document.getElementById('resultText');
+  if (r.classList.contains('placeholder')) return;
+  haptic('light');
+  const utt = new SpeechSynthesisUtterance(r.textContent);
+  utt.lang = dstLang.value === 'uk' ? 'uk-UA' : dstLang.value === 'ru' ? 'ru-RU' : 'en-US';
+  speechSynthesis.speak(utt);
+});
+
+// ── Favorites ─────────────────────────────────────────────────────────────
+document.getElementById('favBtn').addEventListener('click', () => {
+  if (!lastResult) return;
+  haptic('medium');
+  const btn = document.getElementById('favBtn');
+  const exists = favorites.find(f => f.src === lastResult.src && f.srcLang === lastResult.srcLang);
+  if (exists) {
+    favorites = favorites.filter(f => !(f.src === lastResult.src && f.srcLang === lastResult.srcLang));
+    btn.classList.remove('active');
+    showToast('Удалено из избранного');
+  } else {
+    favorites.unshift(lastResult);
+    btn.classList.add('active');
+    showToast('Добавлено в избранное ⭐');
+  }
+  saveData('lingvo_favorites', favorites);
+});
+
+// ── Mic (voice input) ────────────────────────────────────────────────────
+let recognition = null;
+const micBtn = document.getElementById('micBtn');
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onresult = (e) => {
+    inputText.value = e.results[0][0].transcript;
+    updateCharCount();
+    micBtn.classList.remove('recording');
+    micBtn.textContent = '🎤';
+    doTranslate();
+  };
+  recognition.onerror = () => { micBtn.classList.remove('recording'); micBtn.textContent = '🎤'; };
+  recognition.onend = () => { micBtn.classList.remove('recording'); micBtn.textContent = '🎤'; };
+
+  micBtn.addEventListener('click', () => {
+    haptic('medium');
+    recognition.lang = srcLang.value === 'uk' ? 'uk-UA' : srcLang.value === 'ru' ? 'ru-RU' : 'en-US';
+    recognition.start();
+    micBtn.classList.add('recording');
+    micBtn.textContent = '⏹';
+  });
+} else {
+  micBtn.style.display = 'none';
+}
+
+// ── Render History ────────────────────────────────────────────────────────
+const LANG_FLAGS = { ru: '🇷🇺', en: '🇬🇧', uk: '🇺🇦' };
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < 60000) return 'только что';
+  if (diff < 3600000) return Math.floor(diff/60000) + ' мин назад';
+  if (diff < 86400000) return Math.floor(diff/3600000) + ' ч назад';
+  return new Date(ts).toLocaleDateString('ru');
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🕒</div><div class="empty-text">История пуста</div></div>';
+    return;
+  }
+  el.innerHTML = history.map((h, i) => `
+    <div class="history-item fade-in" onclick="loadFromHistory(${i})">
+      <div class="history-from">${h.src}</div>
+      <div class="history-to">${h.dst}</div>
+      <div class="history-meta">
+        <span class="history-lang">${LANG_FLAGS[h.srcLang]} → ${LANG_FLAGS[h.dstLang]}</span>
+        <span class="history-time">${timeAgo(h.time)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadFromHistory(i) {
+  haptic('light');
+  const item = history[i];
+  srcLang.value = item.srcLang; dstLang.value = item.dstLang;
+  inputText.value = item.src; updateCharCount();
+  const r = document.getElementById('resultText');
+  r.textContent = item.dst; r.classList.remove('placeholder');
+  lastResult = item;
+  // switch to translate tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-tab="translate"]').classList.add('active');
+  document.getElementById('screen-translate').classList.add('active');
+}
+
+function renderFavorites() {
+  const el = document.getElementById('favList');
+  if (!favorites.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div><div class="empty-text">Нет избранных</div></div>';
+    return;
+  }
+  el.innerHTML = favorites.map((h, i) => `
+    <div class="history-item fade-in" onclick="loadFromFav(${i})">
+      <div class="history-from">${h.src}</div>
+      <div class="history-to">${h.dst}</div>
+      <div class="history-meta">
+        <span class="history-lang">${LANG_FLAGS[h.srcLang]} → ${LANG_FLAGS[h.dstLang]}</span>
+        <span style="font-size:10px;color:#fbbf24">⭐ Избранное</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadFromFav(i) {
+  haptic('light');
+  const item = favorites[i];
+  srcLang.value = item.srcLang; dstLang.value = item.dstLang;
+  inputText.value = item.src; updateCharCount();
+  const r = document.getElementById('resultText');
+  r.textContent = item.dst; r.classList.remove('placeholder');
+  lastResult = item;
+  document.getElementById('favBtn').classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-tab="translate"]').classList.add('active');
+  document.getElementById('screen-translate').classList.add('active');
+}
+
+// ── Settings actions ──────────────────────────────────────────────────────
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  haptic('medium');
+  history = []; saveData('lingvo_history', history); updateStats();
+  showToast('История очищена');
+});
+document.getElementById('clearFavBtn').addEventListener('click', () => {
+  haptic('medium');
+  favorites = []; saveData('lingvo_favorites', favorites);
+  showToast('Избранное очищено');
+});
+</script>
+</body>
+</html>
